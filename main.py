@@ -31,16 +31,11 @@ class Bird(pygame.sprite.Sprite):
 
       # Scale the image to custom size
       self.image = pygame.transform.rotate(self.img, 0)
+      self.rect = self.image.get_rect(center=(SCREENX / 2, SCREENY / 2))
 
-      self.rect = self.image.get_rect()
-      self.rect.center = (SCREENX / 2, SCREENY / 2)
-
-      self.vector = pygame.math.Vector2
-
-      self.pos = self.vector(self.rect.center)
-      self.velocity = self.vector(0, 0)
-      self.acceleration = self.vector(0, GRAVITY)
-
+      self.pos = pygame.math.Vector2(self.rect.center)
+      self.velocity = pygame.math.Vector2(0, 0)
+      self.acceleration = pygame.math.Vector2(0, GRAVITY)
 
    def update(self):
       self.velocity += self.acceleration
@@ -59,8 +54,6 @@ class Bird(pygame.sprite.Sprite):
 
 
 class Pipe(pygame.sprite.Sprite):
-   passed = False
-   
    def __init__(self, pos_x, height, isTop):
       super().__init__()
 
@@ -68,16 +61,15 @@ class Pipe(pygame.sprite.Sprite):
       self.image = pygame.transform.scale(self.img, (PIPE_WIDTH, height))
 
       pos_y = BASEY - height
-
       if isTop:
          self.image = pygame.transform.rotate(self.image, 180)
          pos_y = 0
 
       self.rect = self.image.get_rect(x=pos_x, y=pos_y)
+      self.passed = False
 
    def update(self):
       self.rect.x -= SPEED
-
       if self.rect.x < -100:
          self.kill()
 
@@ -85,7 +77,6 @@ class Pipe(pygame.sprite.Sprite):
       if self.rect.x < (SCREENX / 2) + (PIPE_WIDTH / 2) and not self.passed:
          self.passed = True
          return 0.5
-      
       return 0
 
 
@@ -137,7 +128,6 @@ class Game:
 
          if start and not crashed:
             collisions = pygame.sprite.spritecollide(bird, pipes, False)
-
             if not bird.isAlive() or collisions:
                crashed = True
 
@@ -158,8 +148,8 @@ class Game:
          if crashed:
             # Game Over Label
             GOText = self.GOFont.render('GAME OVER', True, WHITE)
-            GOLabel = GOText.get_rect()
-            self.screen.blit(GOText, (SCREENX/2 - GOLabel[2]/2, SCREENY/2 - GOLabel[3]/2))
+            GOLabel = GOText.get_rect(center=(SCREENX/2, SCREENY/2))
+            self.screen.blit(GOText, GOLabel)
 
             # Restart Button
             restartText = self.restartFont.render('Restart', True, WHITE)
@@ -171,7 +161,6 @@ class Game:
             left, top, width, height = restartLabel
             if left + width > mouse[0] > left and top + height > mouse[1] > top:
                pygame.draw.rect(self.screen, (144, 238, 144), restartLabel)
-
                if click[0] == 1:
                   return self.run()
             else:
